@@ -41,7 +41,7 @@ export class Pila<T> {
   } //devuelve cuantos elementos hay guardados actualmente
 
   // Retorna una copia superficial para renderizar sin mutar el original
-  aArray(): T[] {
+  Array(): T[] {
     return [...this.#items]; //es el arreglo privado pero devuelve una copia superficial para q no se pueda mutar el original
   } //metodo q prromete devolver un array tradicional con los mismos elementos q contienen
   //una pilla

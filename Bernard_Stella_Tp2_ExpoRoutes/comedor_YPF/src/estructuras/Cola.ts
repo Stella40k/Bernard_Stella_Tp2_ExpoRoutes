@@ -1,77 +1,55 @@
-//implementa la clase Cola eficiente sin shift
-
-//principio FIFO (First In, First Out / Primero en entrar, primero en salir)
-
-//el comedor atiende por orden de llegada, primer ek akumno q confirma
-// su pedido es el primero en atenderse
-
-//Los elementos nuevos siempre se agregan al final
-//Los elementos siempre se atienden o eliminan desde el frente
-
-// enqueue(item): agregar un elemento al final
-// dequeue(): sacar y retornar el elemento del frente
-// peek() o front(): mirar qué elemento está al frente sin sacarlo
-// isEmpty(): saber si la cola está vacía
-// size(): saber cuántos elementos hay
-
+/**
+ * Implementación de Cola (Queue) eficiente con campos privados (#items, #frente).
+ * Sigue el principio FIFO (First In, First Out / Primero en entrar, primero en salir).
+ * No utiliza array.shift() para evitar la penalización O(N) de reindexación en cada extracción.
+ */
 export class Cola<T> {
-  private elementos: T[]; //encapsulamiento, estoy protegiendo las reglas de la cola
+  #items: (T | undefined)[] = [];
+  #frente: number = 0;
 
-  constructor() {
-    // Inicializamos la cola con un arreglo vacío
-    this.elementos = [];
+  // Encola un nuevo elemento al final de la cola (O(1))
+  encolar(elemento: T): void {
+    this.#items.push(elemento);
   }
 
-  // 1. Agregar un elemento al final de la cola
-  //este metodo representa la accion de formarse o ponerse al final de la fila
-  enqueue(item: T): void {
-    this.elementos.push(item); //agrega el nuevo elemento al final de la lista (el final de la cola)
-  }
-  //enqueue: encolar en ingles, agrega un elemento al final
-  //item: T: parametro que recibe la funcion,representa al dato o cosa q quiera sumar a la cola
-  //void: guarda el valor internamente, no retorna nada, solo hace la accion de agregar el elemento al final de la cola
-
-  // 2. Quitar y devolver el primer elemento (el del frente)
-  //dequeue: desencolar en ingl. Si hay elementos devuelve el primero y lo saca de la cola,
-  // si no hay elementos devuelve undefined
-  dequeue(): T | undefined {
-    if (this.isEmpty()) {
-      //verifica si la cola esta vacia
+  // Desencola y retorna el elemento del frente de la cola (O(1))
+  desencolar(): T | undefined {
+    if (this.vacia) {
       return undefined;
     }
-    // shift() saca el primer elemento del arreglo y lo retorna
-    return this.elementos.shift(); //shift: elimina el elemento q esta en la posicion 0
-    //retorna ese elemento eliminado y reacomoda el resto de los elementos hacia la izquierda
+    const item = this.#items[this.#frente];
+    this.#items[this.#frente] = undefined; // Libera la referencia en memoria
+    this.#frente++;
+
+    // Compactación opcional periódica cuando el índice de frente avanza mucho
+    if (this.#frente > 50 && this.#frente * 2 >= this.#items.length) {
+      this.#items = this.#items.slice(this.#frente);
+      this.#frente = 0;
+    }
+
+    return item;
   }
 
-  // 3. Ver el primer elemento sin sacarlo
-  //peek: espia. Eso esta para revisar el elemento del frente dejando todo como esta
-  //si hay datos (T) devuelve el primero sino devuelve undefined
-  peek(): T | undefined {
-    if (this.isEmpty()) {
-      //verifica si la cola esta vacia
+  // Consulta el elemento que está en el frente sin sacarlo (O(1))
+  frente(): T | undefined {
+    if (this.vacia) {
       return undefined;
     }
-    return this.elementos[0]; //devuelve el primer elemento del arreglo sin sacarlo solo lo mira
+    return this.#items[this.#frente];
   }
 
-  //metodo para saber si la cola esta completamente vacia, devuelve true si esta vacia y false si tiene elementos
-  isEmpty(): boolean {
-    return this.elementos.length === 0;
+  // Getter booleano que indica si la cola está vacía
+  get vacia(): boolean {
+    return this.tamanio === 0;
   }
 
-  // 5. Saber la cantidad de elementos en la cola
-  size(): number {
-    return this.elementos.length;
+  // Getter que devuelve la cantidad de elementos en espera
+  get tamanio(): number {
+    return this.#items.length - this.#frente;
   }
 
-  // 6. Obtener todos los elementos (útil para renderizar la lista en React)
-  getItems(): T[] {
-    return [...this.elementos];
-  }
-
-  // 7. Vaciar la cola
-  clear(): void {
-    this.elementos = []; //asigno un array vacio pq es mas rapido y directo de reiniciar la cola
+  // Retorna una copia superficial con los elementos actualmente en la cola (de frente a final)
+  aArray(): T[] {
+    return (this.#items.slice(this.#frente).filter((item): item is T => item !== undefined));
   }
 }
